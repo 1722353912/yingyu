@@ -1,0 +1,39 @@
+# ============================================================
+#  应用插件下载站 · Cloudflare 部署配置（wrangler.toml）
+# ============================================================
+#  使用前必做（详见 README.md）：
+#   1. npm install          # 安装 wrangler
+#   2. wrangler login       # 登录 Cloudflare 账号
+#   3. wrangler d1 create download-station-db   # 创建数据库，把返回的 database_id 填到下面
+#   4. wrangler r2 bucket create download-station-files   # 创建存储桶（无需改配置）
+#   5. wrangler d1 execute download-station-db --file=./schema.sql   # 建表
+#   6. wrangler secret put AUTH_SECRET          # 设置令牌加密密钥（随便输入一串随机字符）
+#   7. npm run deploy        # 部署上线
+# ============================================================
+
+# 应用名称（部署后域名前缀：<name>.<你的子域>.workers.dev）
+name = "download-station"
+
+# 后端入口文件
+main = "src/index.js"
+
+# 兼容日期（Cloudflare 运行时版本开关）
+compatibility_date = "2024-11-01"
+
+# ---------- 静态资源：前端页面目录（public/ 下的文件自动托管） ----------
+[assets]
+directory = "./public"
+binding = "ASSETS"
+# 任何未匹配的路径都回退到 index.html（配合前端 hash 路由使用）
+not_found_handling = "single-page-application"
+
+# ---------- D1 数据库绑定 ----------
+[[d1_databases]]
+binding = "DB"                                # 代码里通过 env.DB 访问
+database_name = "download-station-db"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID" # ← 执行 wrangler d1 create 后替换
+
+# ---------- R2 对象存储绑定（存放管理员上传的文件） ----------
+[[r2_buckets]]
+binding = "FILES"                             # 代码里通过 env.FILES 访问
+bucket_name = "download-station-files"
